@@ -2,17 +2,24 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Programming on Gideon</title>
-    <link>https://hugo-profile.netlify.app/categories/programming/</link>
+    <link>http://localhost:4321/categories/programming/</link>
     <description>Recent content in Programming on Gideon</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 28 May 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="https://hugo-profile.netlify.app/categories/programming/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 29 May 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:4321/categories/programming/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Organize your Go middleware without dependencies</title>
+      <link>http://localhost:4321/post/2025-05-29-organize-your-go-middleware-without-dependencies/</link>
+      <pubDate>Thu, 29 May 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:4321/post/2025-05-29-organize-your-go-middleware-without-dependencies/</guid>
+      <description>&lt;p&gt;For many years, I&amp;rsquo;ve used third-party packages to help organize and manage middleware in my Go web applications. In small projects, I often used &lt;a href=&#34;https://github.com/justinas/alice&#34;&gt;alice&lt;/a&gt; to create middleware &amp;lsquo;chains&amp;rsquo; that I could reuse across multiple routes. And for larger applications, with lots of middleware and routes, I typically used a router like &lt;a href=&#34;https://github.com/go-chi/chi&#34;&gt;chi&lt;/a&gt; or &lt;a href=&#34;https://github.com/alexedwards/flow&#34;&gt;flow&lt;/a&gt; to create nested route &amp;lsquo;groups&amp;rsquo; with per-group middleware.&lt;/p&gt;&#xA;&lt;p&gt;But since Go 1.22 introduced the new pattern matching functionality for &lt;code&gt;http.ServeMux&lt;/code&gt;, where possible I&amp;rsquo;ve tried to drop third-party dependencies from my routing logic and shift to using just the standard library.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>How to Build Heartbeats in Go: Let Your Goroutines Say ‘Still Breathing!’</title>
-      <link>https://hugo-profile.netlify.app/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/</link>
+      <link>http://localhost:4321/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/</link>
       <pubDate>Wed, 28 May 2025 00:00:00 +0000</pubDate>
-      <guid>https://hugo-profile.netlify.app/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/</guid>
+      <guid>http://localhost:4321/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/</guid>
       <description>&lt;p&gt;&lt;strong&gt;Ever wonder how to make your Go services show signs of life… even when they’re bored out of their mind?&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;You’re not alone.&lt;/p&gt;&#xA;&lt;p&gt;&lt;em&gt;Imagine this&lt;/em&gt;: You’ve got a bunch of goroutines quietly waiting for work to show up. All seems peaceful. Until… &lt;em&gt;boom&lt;/em&gt; — you discover one of them died hours ago, and no one told you. No logs, no panics, no error traces — just pure ghosting.&lt;/p&gt;&#xA;&lt;p&gt;Wanna avoid that silent death?&lt;br&gt;&#xA;Let’s teach our goroutines to &lt;em&gt;breathe&lt;/em&gt; — or more specifically, &lt;strong&gt;send heartbeats&lt;/strong&gt;.&lt;/p&gt;</description>
     </item>
   </channel>

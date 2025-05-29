@@ -2,11 +2,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>How to Build Heartbeats in Go: Let Your Goroutines Say ‘Still Breathing!’ on Gideon</title>
-    <link>https://hugo-profile.netlify.app/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/</link>
+    <link>http://localhost:4321/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/</link>
     <description>Recent content in How to Build Heartbeats in Go: Let Your Goroutines Say ‘Still Breathing!’ on Gideon</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate></lastBuildDate>
-    <atom:link href="https://hugo-profile.netlify.app/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:4321/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
