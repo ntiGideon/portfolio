@@ -1,0 +1,221 @@
+---
+title: Organize your Go middleware without dependencies
+author: Gideon Nti Boateng
+date: '2025-05-29'
+slug: []
+categories:
+  - Algorithms
+  - Golang
+  - Programming
+  - Concurrency
+tags: []
+draft: yes
+image: ~
+description: ~
+toc: ~
+---
+
+For many years, I've used third-party packages to help organize and manage middleware in my Go web applications. In small projects, I often used [alice](https://github.com/justinas/alice) to create middleware 'chains' that I could reuse across multiple routes. And for larger applications, with lots of middleware and routes, I typically used a router like [chi](https://github.com/go-chi/chi) or [flow](https://github.com/alexedwards/flow) to create nested route 'groups' with per-group middleware.
+
+But since Go 1.22 introduced the new pattern matching functionality for `http.ServeMux`, where possible I've tried to drop third-party dependencies from my routing logic and shift to using just the standard library.
+
+But going all-in on the standard library leaves a good question: *how should we organize and manage middleware without using any third-party packages?*
+
+## **Why is managing middleware a problem?**
+
+If you have an application with only a few routes and middleware functions, the simplest thing to do is to wrap your handler functions with the necessary middleware on a route-by-route basis. A bit like this:
+
+``` go
+// No middleware on this route.
+mux.Handle("GET /static/", http.FileServerFS(ui.Files))
+
+// Both these routes use the requestID and logRequest middleware.
+mux.Handle("GET /", requestID(logRequest(http.HandlerFunc(home))))
+mux.Handle("GET /article/{id}", requestID(logRequest(http.HandlerFunc(showArticle))))
+
+// This route has the additional authenticateUser and requireAdminUser middleware.
+mux.Handle("GET /admin", requestID(logRequest(authenticateUser(requireAdminUser(http.HandlerFunc(showAdminDashboard))))))
+```
+
+This works, and requires no external dependencies, but you can probably imagine the downsides as the number of routes grows:
+
+-   There's repetition in the route declarations.
+
+-   It's a bit difficult to read and see which routes are using the same middleware at a glance.
+
+-   It feels error-prone — in a large application if you need to add, remove or reorder middleware across many routes it could be easy to miss out one of the routes and not spot the mistake.
+
+## **An alternative to alice**
+
+As I briefly mentioned above, the [alice](https://github.com/justinas/alice) package allows you to declare and reuse 'chains' of middleware. We could rewrite the example code above to use `alice` like so:
+
+``` go
+mux := http.NewServeMux()
+
+// Create a base middleware chain. 
+baseChain := alice.New(requestID, logRequest)
+
+// Extend the base chain with auth middleware for admin-only routes.
+adminChain := baseChain.Append(authenticateUser, requireAdminUser)
+
+// No middleware on this route.
+mux.Handle("GET /static/", http.FileServerFS(ui.Files))
+
+// Public routes using the base middleware.
+mux.Handle("GET /", baseChain.ThenFunc(home))       
+mux.Handle("GET /article/{id}", baseChain.ThenFunc(showArticle)) 
+
+// Admin routes with the additional auth middleware.
+mux.Handle("GET /admin", adminChain.ThenFunc(showAdminDashboard))
+```
+
+To me, this code feels quite a lot cleaner, and it largely mitigates the three problems that we talked about above.
+
+But if you don't want to introduce `alice` as a dependency, it's possible to leverage the [`slices.Backward`](https://pkg.go.dev/slices#Backward) function introduced in Go 1.23 and create your own `chain` type in a few simple lines of code:
+
+``` go
+type chain []func(http.Handler) http.Handler
+
+func (c chain) thenFunc(h http.HandlerFunc) http.Handler {
+    return c.then(h)
+}
+
+func (c chain) then(h http.Handler) http.Handler {
+    for _, mw := range slices.Backward(c) {
+        h = mw(h)
+    }
+    return h
+}
+```
+
+You can then use this `chain` type in your route declarations like so:
+
+``` go
+mux := http.NewServeMux()
+
+// Create a base middleware chain. 
+baseChain := chain{requestID, logRequest}
+
+// Extend the base chain with auth middleware for admin-only routes.
+adminChain := append(baseChain, authenticateUser, requireAdminUser)
+
+mux.Handle("GET /static/", http.FileServerFS(ui.Files))
+
+mux.Handle("GET /", baseChain.thenFunc(home))
+mux.Handle("GET /article/{id}", baseChain.thenFunc(showArticle))
+
+mux.Handle("GET /admin", adminChain.thenFunc(showAdminDashboard))
+```
+
+The syntax in this code isn't exactly the same as using `alice`, but it's pretty close, and in terms of behavior it's functionally the same.
+
+If you're interested in using this approach in your own codebase, I've made tests for the `chain` type available [in this gist](https://gist.github.com/alexedwards/219d88ebdb9c0c9e74715d243f5b2136).
+
+## **An alternative to chi and similar routers**
+
+In large applications, when I have *lots-of-different-middleware* being used on *lots-of-different-routes*, I've always found the route grouping functionality provided by routers like [chi](https://github.com/go-chi/chi) and [flow](https://github.com/alexedwards/flow) to be a huge help.
+
+They basically allow you to create route *groups* with specific middleware, and these groups can be nested, with child groups 'inheriting' and extending the middleware of their parent groups.
+
+Let's take a look at an example using `chi`, which I *think* was the first router to support this style of route grouping functionality.
+
+``` go
+r := chi.NewRouter()
+r.Use(recoverPanic) // 'Global' middleware, used on all routes.
+
+r.Method("GET", "/static/", http.FileServerFS(ui.Files))
+
+// Create a route group.
+r.Group(func(r chi.Router) {
+    // Add the middleware for the group.
+    r.Use(requestID)
+    r.Use(logRequest)
+
+    // The routes declared in the group will use this middleware.
+    r.Get("/", home)
+    r.Get("/article/{id}", showArticle)
+
+    // Create a nested route group. Any routes in this group will use the
+    // middleware declared in the group *and* the parent groups.
+    r.Group(func(r chi.Router) {
+        r.Use(authenticateUser)
+        r.Use(requireAdminUser)
+
+        r.Get("/admin", showAdminDashboard)
+    })
+})
+```
+
+But if you want to stick with the standard library, it doesn't take too much to create your own router implementation that wraps `http.ServeMux` and supports middleware groups in a similar style:
+
+``` go
+type Router struct {
+    globalChain []func(http.Handler) http.Handler
+    routeChain  []func(http.Handler) http.Handler
+    isSubRouter bool
+    *http.ServeMux
+}
+
+func NewRouter() *Router {
+    return &Router{ServeMux: http.NewServeMux()}
+}
+
+func (r *Router) Use(mw ...func(http.Handler) http.Handler) {
+    if r.isSubRouter {
+        r.routeChain = append(r.routeChain, mw...)
+    } else {
+        r.globalChain = append(r.globalChain, mw...)
+    }
+}
+
+func (r *Router) Group(fn func(r *Router)) {
+    subRouter := &Router{routeChain: slices.Clone(r.routeChain), isSubRouter: true, ServeMux: r.ServeMux}
+    fn(subRouter)
+}
+
+func (r *Router) HandleFunc(pattern string, h http.HandlerFunc) {
+    r.Handle(pattern, h)
+}
+
+func (r *Router) Handle(pattern string, h http.Handler) {
+    for _, mw := range slices.Backward(r.routeChain) {
+        h = mw(h)
+    }
+    r.ServeMux.Handle(pattern, h)
+}
+
+func (r *Router) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
+    var h http.Handler = r.ServeMux
+
+    for _, mw := range slices.Backward(r.globalChain) {
+        h = mw(h)
+    }
+    h.ServeHTTP(w, rq)
+}
+```
+
+And then you can use the `Router` type in your code like so:
+
+``` go
+r := NewRouter()
+r.Use(recoverPanic)
+
+r.Handle("GET /static/", http.FileServerFS(ui.Files))
+
+r.Group(func(r *Router) {
+    r.Use(requestID)
+    r.Use(logRequest)
+
+    r.HandleFunc("GET /", home)
+    r.HandleFunc("GET /article/{id}", showArticle)
+
+    r.Group(func(r *Router) {
+        r.Use(authenticateUser)
+        r.Use(requireAdminUser)
+
+        r.HandleFunc("GET /admin", showAdminDashboard)
+    })
+})
+```
+
+Again, complete tests for the `Router` type are available [in this gist](https://gist.github.com/alexedwards/81c75d0dca1a0943be2d5ee228d2d69b).

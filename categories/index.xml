@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Gideon</title>
+    <link>https://hugo-profile.netlify.app/categories/</link>
+    <description>Recent content in Categories on Gideon</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 28 May 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hugo-profile.netlify.app/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Algorithms</title>
+      <link>https://hugo-profile.netlify.app/categories/algorithms/</link>
+      <pubDate>Wed, 28 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hugo-profile.netlify.app/categories/algorithms/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Concurrency</title>
+      <link>https://hugo-profile.netlify.app/categories/concurrency/</link>
+      <pubDate>Wed, 28 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hugo-profile.netlify.app/categories/concurrency/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Golang</title>
+      <link>https://hugo-profile.netlify.app/categories/golang/</link>
+      <pubDate>Wed, 28 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hugo-profile.netlify.app/categories/golang/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Programming</title>
+      <link>https://hugo-profile.netlify.app/categories/programming/</link>
+      <pubDate>Wed, 28 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hugo-profile.netlify.app/categories/programming/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>R</title>
+      <link>https://hugo-profile.netlify.app/categories/r/</link>
+      <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
+      <guid>https://hugo-profile.netlify.app/categories/r/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

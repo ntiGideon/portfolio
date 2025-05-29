@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Organize your Go middleware without dependencies on Gideon</title>
+    <link>http://localhost:4321/post/2025-05-29-organize-your-go-middleware-without-dependencies/</link>
+    <description>Recent content in Organize your Go middleware without dependencies on Gideon</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate></lastBuildDate>
+    <atom:link href="http://localhost:4321/post/2025-05-29-organize-your-go-middleware-without-dependencies/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>

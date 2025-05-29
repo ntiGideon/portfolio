@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Concurrency on Gideon</title>
+    <link>https://hugo-profile.netlify.app/categories/concurrency/</link>
+    <description>Recent content in Concurrency on Gideon</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 28 May 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://hugo-profile.netlify.app/categories/concurrency/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to Build Heartbeats in Go: Let Your Goroutines Say ‘Still Breathing!’</title>
+      <link>https://hugo-profile.netlify.app/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/</link>
+      <pubDate>Wed, 28 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://hugo-profile.netlify.app/post/2025-05-28-how-to-build-heartbeats-in-go-let-your-goroutines-say-still-breathing/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;Ever wonder how to make your Go services show signs of life… even when they’re bored out of their mind?&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;You’re not alone.&lt;/p&gt;&#xA;&lt;p&gt;&lt;em&gt;Imagine this&lt;/em&gt;: You’ve got a bunch of goroutines quietly waiting for work to show up. All seems peaceful. Until… &lt;em&gt;boom&lt;/em&gt; — you discover one of them died hours ago, and no one told you. No logs, no panics, no error traces — just pure ghosting.&lt;/p&gt;&#xA;&lt;p&gt;Wanna avoid that silent death?&lt;br&gt;&#xA;Let’s teach our goroutines to &lt;em&gt;breathe&lt;/em&gt; — or more specifically, &lt;strong&gt;send heartbeats&lt;/strong&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

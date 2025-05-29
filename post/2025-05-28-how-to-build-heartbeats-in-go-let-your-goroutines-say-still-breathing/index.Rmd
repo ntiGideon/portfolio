@@ -1,0 +1,151 @@
+---
+title: 'How to Build Heartbeats in Go: Let Your Goroutines Say ‘Still Breathing!’'
+author: Gideon Nti Boateng
+date: '2025-05-28'
+slug: []
+categories:
+  - Golang
+  - Programming
+  - Concurrency
+  - Algorithms
+tags: []
+image: /images/go.webp
+description: 'How to Build Heartbeats in Go: Let Your Goroutines Say ‘Still Breathing!'
+toc: ~
+---
+
+**Ever wonder how to make your Go services show signs of life… even when they’re bored out of their mind?**
+
+You’re not alone.
+
+*Imagine this*: You’ve got a bunch of goroutines quietly waiting for work to show up. All seems peaceful. Until… *boom* — you discover one of them died hours ago, and no one told you. No logs, no panics, no error traces — just pure ghosting.
+
+Wanna avoid that silent death?\
+Let’s teach our goroutines to *breathe* — or more specifically, **send heartbeats**.
+
+# **🫀 Why Bother with Heartbeats?**
+
+Ever had a background task silently die while your main process happily spins along? Or had to debug why a job queue worker went unresponsive in the middle of the night?
+
+**Heartbeats** help answer:
+
+> “Hey, is that goroutine still alive… or did it take an early retirement?”
+
+If you’re building anything slightly concurrent, heartbeat signals become your tiny, periodic signs of life from those goroutines. You can monitor them, restart them, or just breathe a little easier knowing things are ticking.
+
+# **🛠️ Let’s Build It!**
+
+Let’s say you’ve got a worker goroutine that waits for signals to do some work. While it’s waiting, you also want it to occasionally let the outside world know:
+
+> *“Still alive, boss. Just waiting for the next gig.”*
+
+Here’s how we make that happen:
+
+``` go
+func dowork(done <-chan interface{}, pulseInterval time.Duration) (<-chan interface{}, <-chan struct{}) {
+ heartbeater := make(chan interface{})
+ result := make(chan struct{})
+ go func() {
+  defer close(result)
+  defer close(heartbeater)
+
+  pulse := time.NewTicker(pulseInterval)
+  workGen := time.NewTicker(3 * pulseInterval)
+
+  defer pulse.Stop()
+  defer workGen.Stop()
+
+  sendPulse := func() {
+   select {
+   case heartbeater <- struct{}{}:
+   default:
+    // drop if nobody's listening
+   }
+  }
+
+  sendResult := func(res struct{}) {
+   for {
+    select {
+    case <-done:
+     return
+    case <-pulse.C:
+     sendPulse()
+    case result <- res:
+     return
+    }
+   }
+  }
+
+  for {
+   select {
+   case <-done:
+    return
+   case <-pulse.C:
+    sendPulse()
+   case <-workGen.C:
+    sendResult(struct{}{})
+   }
+  }
+ }()
+ return heartbeater, result
+}
+```
+
+This function returns two channels:
+
+-   `heartbeater`: a non-blocking signal that says, “I’m alive!”
+
+-   `result`: a channel that emits actual work when done.
+
+In the main function, we simulate a 10-second lifetime for our job using `time.AfterFunc`. We read from both the heartbeat and result channels.
+
+# **📡 The Main Function: Listening for Life**
+
+Here’s what that looks like:
+
+``` go
+func main() {
+ done := make(chan interface{})
+ time.AfterFunc(10*time.Second, func() { close(done) })
+
+ pulseInterval := 1 * time.Second
+ heartbreater, result := dowork(done, pulseInterval)
+
+ go func() {
+  for {
+   select {
+   case _, ok := <-heartbreater:
+    if !ok {
+     fmt.Println("worker heartbeat stopped")
+     return
+    }
+    fmt.Println("worker heartbeat")
+   case _, ok := <-result:
+    if !ok {
+     return
+    }
+    fmt.Println("worker completed work")
+   }
+  }
+ }()
+
+ time.Sleep(20 * time.Second)
+}
+```
+
+You’ll see heartbeats printed every second, and actual work output every 3 seconds. After 10 seconds, the goroutine closes `done`, and everything wraps up gracefully.
+
+# **🧠 A Few Takeaways**
+
+-   **Heartbeats** let your monitoring tools or orchestration layer know things are *alive*, even when no work is happening.
+
+-   Non-blocking sends (`select { case ch <- val: default: }`) are perfect for "if you're listening, here's a signal—otherwise, no big deal."
+
+-   Keep your goroutines polite: if they die, let them clean up after themselves.
+
+# **👀 Final Thoughts**
+
+Implementing heartbeats in Go isn’t just a cool concurrency trick — it’s a must-have tool when you’re building resilient systems. You don’t want to wait until 3 AM to find out that your queue worker ghosted you. Be proactive. Make your goroutines send a little “I’m alive” wave now and then.
+
+Because of silent failures?\
+They’re not just frustrating — they’re expensive.
